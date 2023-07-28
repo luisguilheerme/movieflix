@@ -21,6 +21,7 @@ public class MovieService {
 	@Autowired
 	private MovieRepository repository;
 	
+	
 	@Transactional(readOnly = true)
 	public MovieDetailsDTO findById(Long id) {		
 		Optional<Movie> obj = repository.searchById(id);		
@@ -30,16 +31,22 @@ public class MovieService {
 	
 	@Transactional(readOnly = true)
 	public Page<MovieCardDTO> findByGenre(Long id, Pageable pageable) {
+		
 		Page<Movie> result = null;
-		if(id != 0) {
+		
+		if(id == 0) {
+			result = repository.searchAll(pageable);			
+		}
+		else{
 			result = repository.findByGenreIdOrderByTitle(id, pageable);
-		}
-		else {
-			result = repository.searchAll(pageable);
-		}
+		}	
+		
+		if(result.isEmpty()) {
+			throw new ResourceNotFoundException("Resource not Found");
+		}		
+		
 		return result.map(x -> new MovieCardDTO(x));
 	}	
-	
-	
+		
 	
 }
